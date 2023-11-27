@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "Z:\\Files\\BlockApi\\BlogApi\\BlogApi\\BlogApi.csproj": {}
+    "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\BlogApi.csproj": {}
   },
   "projects": {
-    "Z:\\Files\\BlockApi\\BlogApi\\BlogApi\\BlogApi.csproj": {
+    "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\BlogApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "Z:\\Files\\BlockApi\\BlogApi\\BlogApi\\BlogApi.csproj",
+        "projectUniqueName": "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\BlogApi.csproj",
         "projectName": "BlogApi",
-        "projectPath": "Z:\\Files\\BlockApi\\BlogApi\\BlogApi\\BlogApi.csproj",
+        "projectPath": "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\BlogApi.csproj",
         "packagesPath": "C:\\Users\\sitdi\\.nuget\\packages\\",
-        "outputPath": "Z:\\Files\\BlockApi\\BlogApi\\BlogApi\\obj\\",
+        "outputPath": "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sitdi\\AppData\\Roaming\\NuGet\\NuGet.Config"
