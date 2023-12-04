@@ -1,4 +1,6 @@
-﻿namespace BlogApi.DTO;
+﻿using BlogApi.Data.Models;
+
+namespace BlogApi.DTO;
 
 public class CommunityUserDto
 {

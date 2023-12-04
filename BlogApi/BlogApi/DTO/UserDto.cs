@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using BlogApi.Data.Models;
 
 namespace BlogApi.DTO;
 
