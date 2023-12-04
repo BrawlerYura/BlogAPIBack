@@ -4,6 +4,7 @@ namespace BlogApi.Data.Models;
 
 public class User
 {
+    public Guid Id { get; set; }
     [Required]
     [MinLength(1)]
     public string FullName { get; set; }
