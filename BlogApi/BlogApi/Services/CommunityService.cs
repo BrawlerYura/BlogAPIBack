@@ -11,7 +11,7 @@ public class CommunityService : ICommunityService
         throw new NotImplementedException();
     }
 
-    public Task<List<CommunityDto>> GetMyCommunityList()
+    public Task<List<CommunityUserDto>> GetMyCommunityList()
     {
         throw new NotImplementedException();
     }
@@ -31,7 +31,7 @@ public class CommunityService : ICommunityService
         throw new NotImplementedException();
     }
 
-    public Task<CommunityRole> GetCommunityRole(Guid communityId)
+    public Task<CommunityRole?> GetCommunityRole(Guid communityId)
     {
         throw new NotImplementedException();
     }

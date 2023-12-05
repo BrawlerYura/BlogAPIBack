@@ -6,9 +6,8 @@ namespace BlogApi.Services;
 
 public class PostService : IPostService
 {
-    public Task<PostPagedListDto> GetPostsList(List<TagDto> tags, string author, int min, int max, PostSorting sorting,
-        bool onlyMyCommunities = false,
-        int page = 1, int size = 5)
+    public Task<PostPagedListDto> GetPostList(List<TagDto> tags, string author, int min, int max, PostSorting sorting, bool onlyMyCommunities, int page,
+        int size)
     {
         throw new NotImplementedException();
     }
