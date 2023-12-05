@@ -9,7 +9,7 @@ namespace BlogApi.Controllers;
 
 [ApiController]
 [Route("api")]
-public class CommentController
+public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
 
