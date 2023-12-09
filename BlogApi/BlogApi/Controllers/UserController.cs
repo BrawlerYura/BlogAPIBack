@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -9,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace BlogApi.Controllers;
 
 [ApiController]
-[Route("api/account")]
+[Route("api/account/")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -37,6 +39,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("logout")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Log out system user")]
     public async Task Logout()
     {
@@ -50,20 +53,31 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    [Authorize(Policy = "ValidateToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("profile")]
     [SwaggerOperation(Summary = "Get user profile")]
     public async Task<UserDto> GetUserProfile()
     {
-        return await _userService.GetUserProfile(
-            Guid.Parse(User.Identity.Name)
-        );
+        Guid userEmail = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value);
+        
+        if (userEmail == null)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "Unauthorized"
+            );
+            throw ex;
+        } else
+        {
+            return await _userService.GetUserProfile(
+                userEmail
+            );
+        }
     }
 
     [HttpPut]
-    [Authorize]
-    [Authorize(Policy = "ValidateToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("profile")]
     [SwaggerOperation(Summary = "Edit user Profile")]
     public async Task EditUserProfile([FromBody] UserEditModel userEditModel)
