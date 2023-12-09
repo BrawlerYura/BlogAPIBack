@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<PostTag> PostTags { get; set; }
     public DbSet<GroupUser> GroupUsers { get; set; }
+    public DbSet<Token> Token { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -29,6 +30,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Comment>().HasKey(x => x.Id);
         modelBuilder.Entity<PostTag>().HasKey(x => new { x.PostId, x.TagId });
         modelBuilder.Entity<GroupUser>().HasKey(x => new { x.GroupId, x.UserId });
+        modelBuilder.Entity<Token>().HasKey(x => x.InvalidToken);
         
         base.OnModelCreating(modelBuilder);
     }

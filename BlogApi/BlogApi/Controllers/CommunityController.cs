@@ -1,6 +1,8 @@
 using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -26,6 +28,7 @@ public class CommunityController : ControllerBase
     
     [HttpGet]
     [Route("my")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Get users comm list (with the greatest users role in the comm)")]
     public async Task<List<CommunityUserDto>> GetMyCommunityList()
     {
@@ -42,6 +45,7 @@ public class CommunityController : ControllerBase
     
     [HttpGet]
     [Route("{communityId}/post")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Get comms posts")]
     public async Task<PostPagedListDto> GetCommunityPostList(Guid communityId, List<TagDto> tags, PostSorting sorting, int page = 1,
         int size = 5)
@@ -51,6 +55,7 @@ public class CommunityController : ControllerBase
     
     [HttpPost]
     [Route("{communityId}/post")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Create a post in the spec comm")]
     public async Task<Guid> CreatePost(Guid communityId, CreatePostDto createPostDto)
     {
@@ -59,6 +64,7 @@ public class CommunityController : ControllerBase
     
     [HttpGet]
     [Route("{communityId}/role")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Get the greatest users role in the comm (or null)")]
     public async Task<CommunityRole?> GetCommunityRole(Guid communityId)
     {
@@ -67,6 +73,7 @@ public class CommunityController : ControllerBase
     
     [HttpPost]
     [Route("{communityId}/subscribe")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "subscribe to the comm")]
     public async Task SubscribeToCommunity(Guid communityId)
     {
@@ -75,6 +82,7 @@ public class CommunityController : ControllerBase
     
     [HttpDelete]
     [Route("{communityId}/unsubscribe")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "unsubscribe from the comm")]
     public async Task UnsubscribeFromCommunity(Guid communityId)
     {

@@ -1,6 +1,8 @@
 using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -18,6 +20,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Get a list of available posts")]
     public async Task<PostPagedListDto> GetPostList(
         List<TagDto> tags, string author, int min, int max, PostSorting sorting, bool onlyMyCommunities = false,
@@ -28,6 +31,7 @@ public class PostController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Create a personal user post")]
     public async Task CreatePost(CreatePostDto createPostDto)
     {
@@ -36,6 +40,7 @@ public class PostController : ControllerBase
     
     [HttpGet]
     [Route("{postId}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Get information about concrete post")]
     public async Task<PostFullDto> GetPost(Guid postId)
     {
@@ -44,6 +49,7 @@ public class PostController : ControllerBase
     
     [HttpPost]
     [Route("{postId}/like")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Add like to concrete post")]
     public async Task AddLike(Guid postId)
     {
@@ -52,6 +58,7 @@ public class PostController : ControllerBase
     
     [HttpDelete]
     [Route("{postId}/like")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [SwaggerOperation(Summary = "Add like to concrete post")]
     public async Task DeleteLike(Guid postId)
     {

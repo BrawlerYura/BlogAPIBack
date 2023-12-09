@@ -1,6 +1,7 @@
 ﻿using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,8 +28,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
-    [Authorize(Policy = "ValidateToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("post/{postId}/comment")]
     [SwaggerOperation(Summary = "Add a comment to a concrete post")]
     public async Task PostComment([FromBody] CreateCommentDto createCommentDto, Guid postId)
@@ -37,8 +37,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpPut]
-    [Authorize]
-    [Authorize(Policy = "ValidateToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("comment/{commentId}")]
     [SwaggerOperation(Summary = "Edit concrete comment")]
     public async Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId)
@@ -47,8 +46,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpDelete]
-    [Authorize]
-    [Authorize(Policy = "ValidateToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("comment/{commentId}")]
     [SwaggerOperation(Summary = "Delete concrete comment")]
     public async Task DeleteComment(Guid commentId)

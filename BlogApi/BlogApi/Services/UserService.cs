@@ -59,7 +59,7 @@ public class UserService : IUserService
     {
         credentials.Email = NormalizeAttribute(credentials.Email);
 
-        var identity = await GetIdentity(credentials.Email, credentials.Password);
+        var identity = await GetIdentity(credentials.Email);
 
         var now = DateTime.UtcNow;
 
@@ -84,7 +84,23 @@ public class UserService : IUserService
 
     public async Task Logout(string token)
     {
-        
+        var alreadyExistsToken = await _context.Token.FirstOrDefaultAsync(x => x.InvalidToken == token);
+
+        if (alreadyExistsToken == null)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var expiredDate = handler.ReadJwtToken(token).ValidTo;
+            _context.Token.Add(new Token { InvalidToken = token, ExpiredDate = expiredDate });
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "Token is already invalid"
+            );
+            throw ex;
+        }
     }
 
     public async Task<UserDto> GetUserProfile(Guid userId)
@@ -130,7 +146,7 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
     }
 
-    private async Task<ClaimsIdentity> GetIdentity(string email, string password)
+    private async Task<ClaimsIdentity> GetIdentity(string email)
     {
         var userEntity = await _context
             .Users
@@ -144,16 +160,7 @@ public class UserService : IUserService
             );
             throw ex;
         }
-
-        if (!CheckHashPassword(userEntity.Password, password))
-        {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "Wrong password"
-            );
-            throw ex;
-        }
-
+        
         var claims = new List<Claim>
         {
             new(ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
