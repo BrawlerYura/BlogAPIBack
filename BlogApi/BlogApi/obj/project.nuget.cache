@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aCAlQ64tkkwCA1ppFVudiYN+kstG+5/yTZaMgSs4uBlnFy4CcZkmk+/d64MIvwl4hR7mwBE2t78Xo2HJwFkzoQ==",
+  "dgSpecHash": "z9YTX7rJ6GvW3V7zucUR7lv4v0OWUvEYKrbf5pbqrHgfJhs1C/dYgCEFaheQIE1d8B6avfTeB0ubBNru1hs+6Q==",
   "success": true,
   "projectFilePath": "Z:\\Files\\BlockApi\\webNET-Hits-backend-aspnet-project-2\\BlogApi\\BlogApi\\BlogApi.csproj",
   "expectedPackageFiles": [
@@ -43,6 +43,7 @@
     "C:\\Users\\sitdi\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\sitdi\\.nuget\\packages\\npgsql\\8.0.0\\npgsql.8.0.0.nupkg.sha512",
     "C:\\Users\\sitdi\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.0\\npgsql.entityframeworkcore.postgresql.8.0.0.nupkg.sha512",
+    "C:\\Users\\sitdi\\.nuget\\packages\\serilog\\3.1.2-dev-02097\\serilog.3.1.2-dev-02097.nupkg.sha512",
     "C:\\Users\\sitdi\\.nuget\\packages\\swashbuckle.aspnetcore\\6.5.0\\swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
     "C:\\Users\\sitdi\\.nuget\\packages\\swashbuckle.aspnetcore.annotations\\6.5.0\\swashbuckle.aspnetcore.annotations.6.5.0.nupkg.sha512",
     "C:\\Users\\sitdi\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.5.0\\swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",

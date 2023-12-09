@@ -58,10 +58,10 @@ public class UserController : ControllerBase
     [SwaggerOperation(Summary = "Get user profile")]
     public async Task<UserDto> GetUserProfile()
     {
-        Guid userEmail = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
             ?.Value);
         
-        if (userEmail == null)
+        if (userId == null)
         {
             var ex = new Exception();
             ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
@@ -71,7 +71,7 @@ public class UserController : ControllerBase
         } else
         {
             return await _userService.GetUserProfile(
-                userEmail
+                userId
             );
         }
     }
