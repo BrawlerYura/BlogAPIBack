@@ -1,4 +1,5 @@
-﻿using BlogApi.Data.Models;
+﻿using System.Security.Claims;
+using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,7 +23,7 @@ public class CommentController : ControllerBase
     [HttpGet]
     [Route("comment/{postId}/tree")]
     [SwaggerOperation(Summary = "Get all nested comments(replies)")]
-    public async Task<CommentDto> GetComments(Guid postId)
+    public async Task<List<CommentDto>> GetComments(Guid postId)
     {
         return await _commentService.GetComments(postId);
     }
@@ -33,7 +34,9 @@ public class CommentController : ControllerBase
     [SwaggerOperation(Summary = "Add a comment to a concrete post")]
     public async Task PostComment([FromBody] CreateCommentDto createCommentDto, Guid postId)
     {
-        await _commentService.PostComment(createCommentDto, postId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value);
+        await _commentService.PostComment(createCommentDto, postId, userId);
     }
 
     [HttpPut]
@@ -42,7 +45,10 @@ public class CommentController : ControllerBase
     [SwaggerOperation(Summary = "Edit concrete comment")]
     public async Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId)
     {
-        await _commentService.EditComment(updateCommentDto, commentId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value);
+        
+        await _commentService.EditComment(updateCommentDto, commentId, userId);
     }
 
     [HttpDelete]
@@ -51,6 +57,8 @@ public class CommentController : ControllerBase
     [SwaggerOperation(Summary = "Delete concrete comment")]
     public async Task DeleteComment(Guid commentId)
     {
-        await _commentService.DeleteComment(commentId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value);
+        await _commentService.DeleteComment(commentId, userId);
     }
 }

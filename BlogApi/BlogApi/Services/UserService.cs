@@ -8,6 +8,7 @@ using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace BlogApi.Services;
 
@@ -175,11 +176,6 @@ public class UserService : IUserService
         );
 
         return claimsIdentity;
-    }
-
-    private static bool CheckHashPassword(string savedPasswordHash, string password)
-    {
-        return BCrypt.Net.BCrypt.Verify(password, savedPasswordHash);
     }
 
     private static string NormalizeAttribute(string value)

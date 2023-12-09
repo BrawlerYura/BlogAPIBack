@@ -4,8 +4,8 @@ namespace BlogApi.Services.Interfaces;
 
 public interface ICommentService
 {
-    Task<CommentDto> GetComments(Guid postId);
-    Task PostComment(CreateCommentDto createCommentDto, Guid postId);
-    Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId);
-    Task DeleteComment(Guid commentId);
+    Task<List<CommentDto>> GetComments(Guid postId);
+    Task PostComment(CreateCommentDto createCommentDto, Guid postId, Guid userId);
+    Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId, Guid userId);
+    Task DeleteComment(Guid commentId, Guid userId);
 }

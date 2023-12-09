@@ -1,27 +1,97 @@
+using AutoMapper;
+using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Services;
 
 public class CommentService : ICommentService
 {
-    public Task<CommentDto> GetComments(Guid postId)
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public CommentService(ApplicationDbContext context, IMapper mapper)
     {
-        throw new NotImplementedException();
+        _context = context;
+        _mapper = mapper;
+    }
+    
+    public async Task<List<CommentDto>> GetComments(Guid postId)
+    {
+        var comments = await _context.Comments
+            .Where(c => c.PostId == postId || c.ParentId == postId)
+            .ToListAsync();
+        
+        return _mapper.Map<List<CommentDto>>(comments);
     }
 
-    public Task PostComment(CreateCommentDto createCommentDto, Guid postId)
+    public async Task PostComment(CreateCommentDto createCommentDto, Guid postId, Guid userId)
     {
-        throw new NotImplementedException();
+        var userEntity = await _context
+            .Users
+            .FirstOrDefaultAsync(x => x.Id == userId);
+        
+        if (userEntity == null)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "User not exists"
+            );
+        }
+        
+        var newComment = new Comment
+        {
+            Id = Guid.NewGuid(),
+            Content = createCommentDto.Content,
+            ParentId = createCommentDto.ParentId,
+            PostId = postId,
+            UserId = userId
+        };
+        
+        _context.Comments.Add(newComment);
+        await _context.SaveChangesAsync();
     }
 
-    public Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId)
+    public async Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId, Guid userId)
     {
-        throw new NotImplementedException();
+        var comment = await _context
+            .Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+        
+        if (comment == null)
+        {
+            return;
+        }
+
+        if (userId != comment.UserId)
+        {
+            return;
+        }
+        
+        comment.Content = updateCommentDto.Content;
+        
+        await _context.SaveChangesAsync();
     }
 
-    public Task DeleteComment(Guid commentId)
+    public async Task DeleteComment(Guid commentId, Guid userId)
     {
-        throw new NotImplementedException();
+        var comment = await _context
+            .Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+        
+        if (comment == null)
+        {
+            return;
+        }
+
+        if (userId != comment.UserId)
+        {
+            return;
+        }
+        
+        _context.Comments.Remove(comment);
+        
+        await _context.SaveChangesAsync();
     }
 }
