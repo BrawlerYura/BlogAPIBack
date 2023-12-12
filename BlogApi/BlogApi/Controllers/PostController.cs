@@ -1,3 +1,6 @@
+using System.Net;
+using System.Security.Claims;
+using BlogApi.Data;
 using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
@@ -21,26 +24,46 @@ public class PostController : ControllerBase
 
     [HttpGet]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get a list of available posts")]
     public async Task<PostPagedListDto> GetPostList(
         List<TagDto> tags, string author, int min, int max, PostSorting sorting, bool onlyMyCommunities = false,
         int page = 1, int size = 5
     )
     {
-        return await _postService.GetPostList(tags, author, min, max, sorting, onlyMyCommunities, page, size);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        return await _postService.GetPostList(tags, author, min, max, sorting, onlyMyCommunities, page, size, userId);
     }
     
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Create a personal user post")]
     public async Task CreatePost(CreatePostDto createPostDto)
     {
-        await _postService.CreatePost(createPostDto);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        await _postService.CreatePost(createPostDto, userId);
     }
     
     [HttpGet]
     [Route("{postId}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get information about concrete post")]
     public async Task<PostFullDto> GetPost(Guid postId)
     {
@@ -50,18 +73,34 @@ public class PostController : ControllerBase
     [HttpPost]
     [Route("{postId}/like")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Add like to concrete post")]
     public async Task AddLike(Guid postId)
     {
-        await _postService.AddLike(postId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        await _postService.AddLike(postId, userId);
     }
     
     [HttpDelete]
     [Route("{postId}/like")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Add like to concrete post")]
     public async Task DeleteLike(Guid postId)
     {
-        await _postService.DeleteLike(postId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        await _postService.DeleteLike(postId, userId);
     }
 }

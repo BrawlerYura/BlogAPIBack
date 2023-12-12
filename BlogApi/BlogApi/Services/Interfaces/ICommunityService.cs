@@ -7,18 +7,18 @@ public interface ICommunityService
 {
     Task<List<CommunityDto>> GetCommunityList();
     
-    Task<List<CommunityUserDto>> GetMyCommunityList();
+    Task<List<CommunityUserDto>> GetMyCommunityList(Guid userId);
 
     Task<CommunityFullDto> GetCommunity(Guid communityId);
 
-    Task<PostPagedListDto> GetCommunityPostList(Guid communityId, List<TagDto> tags, PostSorting sorting, int page,
-        int size);
+    Task<PostPagedListDto?> GetCommunityPostList(Guid communityId, List<TagDto> tags, PostSorting sorting, int page,
+        int size, Guid userId);
 
     Task<Guid> CreatePost(Guid communityId, CreatePostDto createPostDto);
 
-    Task<CommunityRole?> GetCommunityRole(Guid communityId);
+    Task<CommunityRole?> GetCommunityRole(Guid communityId, Guid userId);
 
-    Task SubscribeToCommunity(Guid communityId);
+    Task SubscribeToCommunity(Guid communityId, Guid userId);
     
-    Task UnsubscribeFromCommunity(Guid communityId);
+    Task UnsubscribeFromCommunity(Guid communityId, Guid userId);
 }

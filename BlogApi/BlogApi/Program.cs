@@ -1,10 +1,13 @@
 using AutoMapper;
 using BlogApi.Configurations;
 using BlogApi.Data.Models;
+using BlogApi.MiddleWares;
 using BlogApi.Services;
 using BlogApi.Services.Interfaces;
+using BlogApi.Services.Token;
 using DeliveryBackend.AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -59,8 +62,16 @@ builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ITagService, TagService>();
 
+builder.Services.AddHttpContextAccessor();
+
 //Auth
-builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationHandler, ValidateTokenHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        "ValidateToken",
+        policy => policy.Requirements.Add(new ValidateTokenRequirement()));
+});
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -75,6 +86,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
         };
     });
+
+// Exceptions handler
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+
 
 var app = builder.Build();
 
@@ -96,6 +111,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.UseAuthentication();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

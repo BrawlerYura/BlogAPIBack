@@ -1,6 +1,7 @@
 using AutoMapper;
 using BlogApi.Data.Models;
 using BlogApi.DTO;
+using BlogApi.Exceptions;
 using BlogApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,30 +17,45 @@ public class CommentService : ICommentService
         _context = context;
         _mapper = mapper;
     }
-    
+
     public async Task<List<CommentDto>> GetComments(Guid postId)
     {
-        var comments = await _context.Comments
+        await FindPost(postId);
+
+        var comments = await _context.Comment
             .Where(c => c.PostId == postId || c.ParentId == postId)
             .ToListAsync();
-        
+
         return _mapper.Map<List<CommentDto>>(comments);
     }
 
     public async Task PostComment(CreateCommentDto createCommentDto, Guid postId, Guid userId)
     {
-        var userEntity = await _context
-            .Users
-            .FirstOrDefaultAsync(x => x.Id == userId);
-        
-        if (userEntity == null)
+        var post = await _context.Post.Where(x => x.Id == postId).FirstOrDefaultAsync();
+        if (post == null)
         {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "User not exists"
-            );
+            throw new KeyNotFoundException($"Post with Id {postId} not found");
+        }
+
+        if(createCommentDto.ParentId != null)
+        {
+            var parentComment =
+                await _context.Comment.Where(x => x.Id == createCommentDto.ParentId).FirstOrDefaultAsync();
+            if (parentComment == null)
+            {
+                throw new KeyNotFoundException($"Comment with Id {createCommentDto.ParentId} not found");
+            }
         }
         
+        var community = await _context.Group.Where(x => x.Id == post.CommunityId).FirstOrDefaultAsync();
+        var subscription = await _context.GroupUser.Where(x => x.GroupId == community.Id && x.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (community.IsClosed && subscription != null)
+        {
+            throw new ForbiddenException("User not subscribed to closed community of post");
+        }
+
         var newComment = new Comment
         {
             Id = Guid.NewGuid(),
@@ -48,50 +64,62 @@ public class CommentService : ICommentService
             PostId = postId,
             UserId = userId
         };
-        
-        _context.Comments.Add(newComment);
+
+        _context.Comment.Add(newComment);
         await _context.SaveChangesAsync();
     }
 
     public async Task EditComment(UpdateCommentDto updateCommentDto, Guid commentId, Guid userId)
     {
-        var comment = await _context
-            .Comments
+        var comment = await _context.Comment
             .FirstOrDefaultAsync(c => c.Id == commentId);
-        
+
         if (comment == null)
         {
-            return;
+            throw new KeyNotFoundException($"Comment with ID: {commentId} not found");
         }
 
         if (userId != comment.UserId)
         {
-            return;
+            throw new ForbiddenException($"User cannot edit a comment with ID: {commentId}");
         }
-        
+
+        if (updateCommentDto.Content == comment.Content)
+        {
+            throw new BadHttpRequestException("Text remained unchanged");
+        }
+
         comment.Content = updateCommentDto.Content;
-        
+
         await _context.SaveChangesAsync();
     }
 
     public async Task DeleteComment(Guid commentId, Guid userId)
     {
-        var comment = await _context
-            .Comments
+        var comment = await _context.Comment
             .FirstOrDefaultAsync(c => c.Id == commentId);
-        
+
         if (comment == null)
         {
-            return;
+            throw new KeyNotFoundException($"Comment with ID: {commentId} not found");
         }
 
         if (userId != comment.UserId)
         {
-            return;
+            throw new ForbiddenException($"User cannot delete a comment with ID: {commentId}");
         }
-        
-        _context.Comments.Remove(comment);
-        
+
+        _context.Comment.Remove(comment);
+
         await _context.SaveChangesAsync();
+    }
+
+    private async Task FindPost(Guid postId)
+    {
+        var post = await _context.Post.Where(x => x.Id == postId).FirstOrDefaultAsync();
+        if (post == null)
+        {
+            throw new KeyNotFoundException($"Post with Id {postId} not found");
+        }
     }
 }

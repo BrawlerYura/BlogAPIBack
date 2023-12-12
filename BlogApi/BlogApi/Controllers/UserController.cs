@@ -1,4 +1,6 @@
+using System.Net;
 using System.Security.Claims;
+using BlogApi.Data;
 using BlogApi.Data.Models;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
@@ -23,6 +25,8 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("register")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Register new user")]
     public async Task<TokenResponse> RegisterUser([FromBody] UserRegisterModel userRegisterDto)
     {
@@ -32,6 +36,9 @@ public class UserController : ControllerBase
     [HttpPost]
     [Route("login")]
     [SwaggerOperation(Summary = "Log in to the system")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     public async Task<TokenResponse> Login([FromBody] LoginCredentials credentials)
     {
         return await _userService.LoginUser(credentials);
@@ -40,6 +47,8 @@ public class UserController : ControllerBase
     [HttpPost]
     [Route("logout")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Log out system user")]
     public async Task Logout()
     {
@@ -54,30 +63,27 @@ public class UserController : ControllerBase
 
     [HttpGet]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
     [Route("profile")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get user profile")]
     public async Task<UserDto> GetUserProfile()
     {
         Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
-            ?.Value);
+            ?.Value ?? string.Empty);
         
-        if (userId == null)
-        {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "Unauthorized"
-            );
-            throw ex;
-        } else
-        {
-            return await _userService.GetUserProfile(
-                userId
-            );
-        }
+        return await _userService.GetUserProfile(
+            userId
+        );
     }
 
     [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = "ValidateToken")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [Route("profile")]
     [SwaggerOperation(Summary = "Edit user Profile")]
     public async Task EditUserProfile([FromBody] UserEditModel userEditModel)

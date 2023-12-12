@@ -1,3 +1,5 @@
+using System.Net;
+using BlogApi.Data;
 using BlogApi.DTO;
 using BlogApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +20,7 @@ public class TagController : ControllerBase
     
     [HttpGet]
     [Route("tag")]
+    [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get tag list")]
     public async Task<List<TagDto>> GetTagList()
     {

@@ -20,7 +20,7 @@ public class CreatePostDto
     [MaxLength(1000)]
     public string? Image { get; set; }
     
-    public Guid? addressId { get; set; }
+    public Guid? AddressId { get; set; }
     
     [Required]
     [MinLength(1)]

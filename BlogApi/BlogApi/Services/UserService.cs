@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using BlogApi.Configurations;
 using BlogApi.Data.Models;
@@ -26,6 +27,7 @@ public class UserService : IUserService
     public async Task<TokenResponse> RegisterUser(UserRegisterModel userRegisterModel)
     {
         userRegisterModel.Email = NormalizeAttribute(userRegisterModel.Email);
+        userRegisterModel.Password = NormalizeAttribute(userRegisterModel.Password);
 
         await UniqueCheck(userRegisterModel);
         
@@ -35,7 +37,7 @@ public class UserService : IUserService
         CheckGender(userRegisterModel.Gender);
         CheckBirthDate(userRegisterModel.BirthDate);
 
-        await _context.Users.AddAsync(new User
+        await _context.User.AddAsync(new User
         {
             Id = Guid.NewGuid(),
             FullName = userRegisterModel.FullName,
@@ -59,8 +61,9 @@ public class UserService : IUserService
     public async Task<TokenResponse> LoginUser(LoginCredentials credentials)
     {
         credentials.Email = NormalizeAttribute(credentials.Email);
+        credentials.Password = NormalizeAttribute(credentials.Password);
 
-        var identity = await GetIdentity(credentials.Email);
+        var identity = await GetIdentity(credentials.Email, credentials.Password);
 
         var now = DateTime.UtcNow;
 
@@ -91,48 +94,34 @@ public class UserService : IUserService
         {
             var handler = new JwtSecurityTokenHandler();
             var expiredDate = handler.ReadJwtToken(token).ValidTo;
-            _context.Token.Add(new Token { InvalidToken = token, ExpiredDate = expiredDate });
+            _context.Token.Add(new Data.Models.Token { InvalidToken = token, ExpiredDate = expiredDate });
             await _context.SaveChangesAsync();
         }
         else
         {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "Token is already invalid"
-            );
-            throw ex;
+            throw new UnauthorizedAccessException("Token is already invalid");
         }
     }
 
     public async Task<UserDto> GetUserProfile(Guid userId)
     {
-        var userEntity = await _context
-            .Users
+        var userEntity = await _context.User
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (userEntity != null)
             return _mapper.Map<UserDto>(userEntity);
-
-        var ex = new Exception();
-        ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-            "User not exists"
-        );
-        throw ex;
+        
+        throw new UnauthorizedAccessException("User not exists");
     }
 
     public async Task EditUserProfile(Guid userId, UserEditModel userEditModel)
     {
-        var userEntity = await _context
-            .Users
+        var userEntity = await _context.User
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (userEntity == null)
         {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "User not exists"
-            );
-            throw ex;
+            throw new UnauthorizedAccessException("User not exists");
         }
 
         CheckGender(userEditModel.Gender);
@@ -147,19 +136,19 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
     }
 
-    private async Task<ClaimsIdentity> GetIdentity(string email)
+    private async Task<ClaimsIdentity> GetIdentity(string email, string password)
     {
-        var userEntity = await _context
-            .Users
+        var userEntity = await _context.User
             .FirstOrDefaultAsync(x => x.Email == email);
 
         if (userEntity == null)
         {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
-                "User not exists"
-            );
-            throw ex;
+            throw new BadHttpRequestException("Wrong email address");
+        }
+        
+        if (!CheckHashPassword(userEntity.Password, password))
+        {
+            throw new BadHttpRequestException("Wrong password");
         }
         
         var claims = new List<Claim>
@@ -178,6 +167,11 @@ public class UserService : IUserService
         return claimsIdentity;
     }
 
+    private static bool CheckHashPassword(string hashedPassword, string password)
+    {
+        return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+    }
+    
     private static string NormalizeAttribute(string value)
     {
         return value.ToLower().TrimEnd();
@@ -185,38 +179,43 @@ public class UserService : IUserService
 
     private async Task UniqueCheck(UserRegisterModel userRegisterModel)
     {
-        var email = await _context
-            .Users
+        var email = await _context.User
             .Where(x => userRegisterModel.Email == x.Email)
             .FirstOrDefaultAsync();
 
         if (email != null)
         {
-            var ex = new Exception();
-            ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
-                $"Account with email '{userRegisterModel.Email}' already exists"
-            );
-            throw ex;
+            throw new BadHttpRequestException($"Account with email '{userRegisterModel.Email}' already exists");
         }
     }
 
+    private static void CheckPassword(string password)
+    {
+        if (password.Length < 6)
+        {
+            throw new BadHttpRequestException("Password must not be less than 6 characters ");
+        }
+        
+        Regex regex = new Regex("^[a-zA-Z0-9!?]*$");
+
+        if (regex.IsMatch(password))
+        {
+            throw new BadHttpRequestException("Password can contain letters and numbers and ! ?");
+        }
+        
+    }
+    
     private static void CheckGender(Gender gender)
     {
         if (gender is Gender.Male or Gender.Female) return;
-
-        var ex = new Exception();
-        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
-            $"Possible Gender values: {Gender.Male.ToString()}, {Gender.Female.ToString()}");
-        throw ex;
+        
+        throw new BadHttpRequestException($"Possible Gender values: {Gender.Male.ToString()}, {Gender.Female.ToString()}");
     }
 
     private static void CheckBirthDate(DateTime? birthDate)
     {
         if (birthDate == null || birthDate <= DateTime.Now) return;
 
-        var ex = new Exception();
-        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
-            "Birth date can't be later than today");
-        throw ex;
+        throw new BadHttpRequestException("Birth date can't be later than today");
     }
 }

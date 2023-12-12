@@ -3,6 +3,7 @@ using System;
 using BlogApi.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231211163446_singular")]
+    partial class singular
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +153,8 @@ namespace BlogApi.Migrations
 
                     b.HasKey("PostId", "TagId");
 
+                    b.HasIndex("TagId");
+
                     b.ToTable("PostTag");
                 });
 
@@ -158,10 +163,6 @@ namespace BlogApi.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("CreateTime")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -217,6 +218,15 @@ namespace BlogApi.Migrations
                     b.ToTable("User");
                 });
 
+            modelBuilder.Entity("BlogApi.Data.Models.GroupUser", b =>
+                {
+                    b.HasOne("BlogApi.Data.Models.Group", null)
+                        .WithMany("GroupUsers")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BlogApi.Data.Models.Like", b =>
                 {
                     b.HasOne("BlogApi.Data.Models.Post", null)
@@ -226,9 +236,28 @@ namespace BlogApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BlogApi.Data.Models.PostTag", b =>
+                {
+                    b.HasOne("BlogApi.Data.Models.Tag", null)
+                        .WithMany("PostTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BlogApi.Data.Models.Group", b =>
+                {
+                    b.Navigation("GroupUsers");
+                });
+
             modelBuilder.Entity("BlogApi.Data.Models.Post", b =>
                 {
                     b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("BlogApi.Data.Models.Tag", b =>
+                {
+                    b.Navigation("PostTags");
                 });
 #pragma warning restore 612, 618
         }
