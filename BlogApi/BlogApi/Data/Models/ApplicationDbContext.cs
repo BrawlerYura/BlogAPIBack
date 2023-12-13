@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BlogApi.Migrations;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Data.Models;
 
@@ -13,6 +14,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<PostTag> PostTag { get; set; }
     public DbSet<GroupUser> GroupUser { get; set; }
     public DbSet<Token> Token { get; set; }
+    public DbSet<AsAddrObj> AsAddrObj { get; set; }
+    public DbSet<AsAdmHierarchy> AsAdmHierarchy { get; set; }
+    public DbSet<AsHouse> AsHouse { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -31,6 +35,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<GroupUser>().HasKey(x => new { x.GroupId, x.UserId });
         modelBuilder.Entity<Like>().HasKey(x => new { x.UserId, x.PostId });
         modelBuilder.Entity<Token>().HasKey(x => x.InvalidToken);
+        modelBuilder.Entity<AsAddrObj>().HasKey(x => x.Id);
+        modelBuilder.Entity<AsAdmHierarchy>().HasKey(x => x.Id);
+        modelBuilder.Entity<AsHouse>().HasKey(x => x.Id);
         
         base.OnModelCreating(modelBuilder);
     }
