@@ -8,6 +8,7 @@ public class TagDto
     public Guid Id { get; set; }
     
     [Required]
+    [Timestamp]
     public DateTime CreateTime { get; set; }
     
     [Required]

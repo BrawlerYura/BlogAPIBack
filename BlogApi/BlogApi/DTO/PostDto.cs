@@ -21,6 +21,7 @@ public class PostDto
     [Required]
     public int ReadingTime { get; set; }
     
+    [Url]
     public string? Image { get; set; }
     
     [Required]

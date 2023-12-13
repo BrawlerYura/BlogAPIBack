@@ -13,6 +13,8 @@ public class User
     [MinLength(6)]
     public string Password { get; set; }
     
+    public DateTime CreateTime { get; set; }
+    
     [Required]
     [MinLength(1)]
     [EmailAddress]

@@ -45,24 +45,36 @@ public class CommentService : ICommentService
             {
                 throw new KeyNotFoundException($"Comment with Id {createCommentDto.ParentId} not found");
             }
-        }
-        
-        var community = await _context.Group.Where(x => x.Id == post.CommunityId).FirstOrDefaultAsync();
-        var subscription = await _context.GroupUser.Where(x => x.GroupId == community.Id && x.UserId == userId)
-            .FirstOrDefaultAsync();
 
-        if (community.IsClosed && subscription != null)
+            if (parentComment.PostId != postId)
+            {
+                throw new ConflictException("Айди поста у коммента папы не равен айди коммента который сынок");
+            }
+
+            await IncreaseSubCommentsCount(parentComment);
+        }
+
+        if (post.CommunityId != null)
         {
-            throw new ForbiddenException("User not subscribed to closed community of post");
+            var community = await _context.Group.Where(x => x.Id == post.CommunityId).FirstOrDefaultAsync();
+            var subscription = await _context.GroupUser.Where(x => x.GroupId == community.Id && x.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (community.IsClosed && subscription == null)
+            {
+                throw new ForbiddenException("User not subscribed to closed community of post");
+            }
         }
 
         var newComment = new Comment
         {
             Id = Guid.NewGuid(),
             Content = createCommentDto.Content,
+            CreateTime = DateTime.UtcNow,
             ParentId = createCommentDto.ParentId,
             PostId = postId,
-            UserId = userId
+            UserId = userId,
+            SubComments = 0
         };
 
         _context.Comment.Add(newComment);
@@ -108,6 +120,14 @@ public class CommentService : ICommentService
         {
             throw new ForbiddenException($"User cannot delete a comment with ID: {commentId}");
         }
+        
+        if(comment.ParentId != null)
+        {
+            var parentComment =
+                await _context.Comment.Where(x => x.Id == comment.ParentId).FirstOrDefaultAsync();
+
+            await DecreaseSubCommentsCount(parentComment);
+        }
 
         _context.Comment.Remove(comment);
 
@@ -120,6 +140,36 @@ public class CommentService : ICommentService
         if (post == null)
         {
             throw new KeyNotFoundException($"Post with Id {postId} not found");
+        }
+    }
+
+    private async Task IncreaseSubCommentsCount(Comment? parentComment)
+    {
+        if (parentComment != null)
+        {
+            parentComment.SubComments += 1;
+
+            if (parentComment.ParentId != null)
+            {
+                var parentParentComment =
+                    await _context.Comment.Where(x => x.Id == parentComment.ParentId).FirstOrDefaultAsync();
+                await IncreaseSubCommentsCount(parentParentComment);
+            }
+        }
+    }
+    
+    private async Task DecreaseSubCommentsCount(Comment? parentComment)
+    {
+        if (parentComment != null)
+        {
+            parentComment.SubComments -= 1;
+
+            if (parentComment.ParentId != null)
+            {
+                var parentParentComment =
+                    await _context.Comment.Where(x => x.Id == parentComment.ParentId).FirstOrDefaultAsync();
+                await DecreaseSubCommentsCount(parentParentComment);
+            }
         }
     }
 }

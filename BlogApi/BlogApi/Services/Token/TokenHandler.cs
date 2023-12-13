@@ -45,13 +45,33 @@ public class ValidateTokenHandler : AuthorizationHandler<ValidateTokenRequiremen
 
                 using var scope = _serviceScopeFactory.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                var tokenEntity = await dbContext.Token
-                    .FirstOrDefaultAsync(x => x.InvalidToken == token);
-
-                if (tokenEntity != null && tokenEntity.ExpiredDate > DateTime.UtcNow)
+                
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                
+                if (jsonToken != null)
                 {
-                    throw new UnauthorizedAccessException("Token expired");
+
+                    var tokenEntity = await dbContext.Token
+                        .FirstOrDefaultAsync(x => x.InvalidToken == token);
+                
+                    if (tokenEntity != null)
+                    {
+                        throw new UnauthorizedAccessException("Token expired");
+                    }
+                    
+                    if (jsonToken.ValidTo < DateTime.UtcNow)
+                    {
+                        dbContext.Token.Add(new Data.Models.Token
+                        {
+                            InvalidToken = token,
+                            ExpiredDate = jsonToken.ValidTo
+                        });
+
+                        await dbContext.SaveChangesAsync();
+                        
+                        throw new UnauthorizedAccessException("Token expired");
+                    }
                 }
             }
 

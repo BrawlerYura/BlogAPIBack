@@ -23,6 +23,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet]
+    [Route("")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize(Policy = "ValidateToken")]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -31,7 +32,7 @@ public class PostController : ControllerBase
     [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get a list of available posts")]
     public async Task<PostPagedListDto> GetPostList(
-        List<TagDto> tags, string author, int min, int max, PostSorting sorting, bool onlyMyCommunities = false,
+        [FromQuery] List<Guid>? tags, string? author, int? min, int? max, PostSorting? sorting, bool onlyMyCommunities = false,
         int page = 1, int size = 5
     )
     {
@@ -42,6 +43,7 @@ public class PostController : ControllerBase
     }
     
     [HttpPost]
+    [Route("")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize(Policy = "ValidateToken")]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -67,7 +69,10 @@ public class PostController : ControllerBase
     [SwaggerOperation(Summary = "Get information about concrete post")]
     public async Task<PostFullDto> GetPost(Guid postId)
     {
-        return await _postService.GetPost(postId);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        return await _postService.GetPost(postId, userId);
     }
     
     [HttpPost]

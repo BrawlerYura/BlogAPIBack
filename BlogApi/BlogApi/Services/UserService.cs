@@ -46,6 +46,7 @@ public class UserService : IUserService
             Gender = userRegisterModel.Gender,
             Password = hashedPassword,
             PhoneNumber = userRegisterModel.PhoneNumber,
+            CreateTime = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
 

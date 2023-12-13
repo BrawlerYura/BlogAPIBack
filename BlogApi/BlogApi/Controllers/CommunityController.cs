@@ -65,7 +65,7 @@ public class CommunityController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType(typeof(ExceptionDetails), (int)HttpStatusCode.InternalServerError)]
     [SwaggerOperation(Summary = "Get comms posts")]
-    public async Task<PostPagedListDto?> GetCommunityPostList(Guid communityId, List<TagDto> tags, PostSorting sorting, int page = 1,
+    public async Task<PostPagedListDto?> GetCommunityPostList(Guid communityId, [FromQuery] List<Guid>? tags, PostSorting sorting, int page = 1,
         int size = 5)
     {
         Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
@@ -86,7 +86,10 @@ public class CommunityController : ControllerBase
     [SwaggerOperation(Summary = "Create a post in the spec comm")]
     public async Task<Guid> CreatePost(Guid communityId, CreatePostDto createPostDto)
     {
-        return await _communityService.CreatePost(communityId, createPostDto);
+        Guid userId = Guid.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimsIdentity.DefaultNameClaimType)
+            ?.Value ?? string.Empty);
+        
+        return await _communityService.CreatePost(communityId, createPostDto, userId);
     }
     
     [HttpGet]

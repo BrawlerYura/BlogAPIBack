@@ -16,5 +16,5 @@ public class AuthorDto
     
     public int Posts { get; set; }
     public int Likes { get; set; }
-    public DateTime Created { get; set; }
+    public DateTime CreateTime { get; set; }
 }

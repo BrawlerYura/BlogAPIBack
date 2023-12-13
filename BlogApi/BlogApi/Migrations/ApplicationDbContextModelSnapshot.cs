@@ -32,11 +32,17 @@ namespace BlogApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("SubComments")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -52,6 +58,9 @@ namespace BlogApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -62,6 +71,9 @@ namespace BlogApi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("SubscribersCount")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -94,8 +106,6 @@ namespace BlogApi.Migrations
 
                     b.HasKey("UserId", "PostId");
 
-                    b.HasIndex("PostId");
-
                     b.ToTable("Like");
                 });
 
@@ -106,6 +116,9 @@ namespace BlogApi.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("AddressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CommunityId")
@@ -122,6 +135,9 @@ namespace BlogApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Likes")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Photo")
                         .HasColumnType("text");
 
@@ -131,9 +147,6 @@ namespace BlogApi.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -159,9 +172,8 @@ namespace BlogApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CreateTime")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -194,6 +206,9 @@ namespace BlogApi.Migrations
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -215,20 +230,6 @@ namespace BlogApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("BlogApi.Data.Models.Like", b =>
-                {
-                    b.HasOne("BlogApi.Data.Models.Post", null)
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BlogApi.Data.Models.Post", b =>
-                {
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

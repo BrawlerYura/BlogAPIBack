@@ -1,6 +1,7 @@
 using AutoMapper;
 using BlogApi.Configurations;
 using BlogApi.Data.Models;
+using BlogApi.DTO;
 using BlogApi.MiddleWares;
 using BlogApi.Services;
 using BlogApi.Services.Interfaces;
@@ -61,6 +62,7 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
 
 builder.Services.AddHttpContextAccessor();
 

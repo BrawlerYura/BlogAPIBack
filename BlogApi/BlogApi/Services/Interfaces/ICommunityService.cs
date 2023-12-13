@@ -11,10 +11,10 @@ public interface ICommunityService
 
     Task<CommunityFullDto> GetCommunity(Guid communityId);
 
-    Task<PostPagedListDto?> GetCommunityPostList(Guid communityId, List<TagDto> tags, PostSorting sorting, int page,
+    Task<PostPagedListDto?> GetCommunityPostList(Guid communityId, List<Guid>? tags, PostSorting sorting, int page,
         int size, Guid userId);
 
-    Task<Guid> CreatePost(Guid communityId, CreatePostDto createPostDto);
+    Task<Guid> CreatePost(Guid communityId, CreatePostDto createPostDto, Guid userId);
 
     Task<CommunityRole?> GetCommunityRole(Guid communityId, Guid userId);
 

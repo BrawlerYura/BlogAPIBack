@@ -9,8 +9,8 @@ public class Post
     public DateTime CreateTime { get; set; }
     public int ReadingTime { get; set; }
     public string? Photo { get; set; }
-    public Guid UserId { get; set; }
+    public Guid AuthorId { get; set; }
     public Guid? CommunityId { get; set; }
     public Guid? AddressId { get; set; }
-    public List<Like> Likes { get; set; }
+    public int Likes { get; set; }
 }
